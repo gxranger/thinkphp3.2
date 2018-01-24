@@ -1,0 +1,41 @@
+ // 百度主动实时推送
+   public function bdUrls() {  
+
+    $m = M('article'); 
+
+    $urls = array(); 
+    $kinds =  array(); 
+    $nowtime = time();
+    $todaytime = strtotime(date('Y-m-d'));
+    $dats = $m->field('id')->where('id>85 AND add_time>='.$todaytime.' AND add_time<='.$nowtime)->order('add_time desc')->select(); 
+    $mnum = $m->field('id')->where('id>85')->order('add_time desc')->count();
+
+        if (is_array($dats)){ 
+
+            foreach($dats as $key=>$vals){  
+                $urls[$key] = $vals;  
+            }
+            for ($i=0; $i < $mnum; $i++) { 
+                    $arid = $urls[$i];
+                    $kinds[]='http://www.gzcarp.com/show-'.$arid[id].'.html'; 
+             }
+        }  
+        
+
+             //以下代码直接从百度站长工具里复制过来  
+        $api = 'http://data.zz.baidu.com/urls?site=网址&token=百度站长工具提供的token';  
+        $ch = curl_init();  
+        $options = array(CURLOPT_URL =>$api, CURLOPT_POST =>true, CURLOPT_RETURNTRANSFER =>true, CURLOPT_POSTFIELDS =>implode("\n", $kinds), CURLOPT_HTTPHEADER =>array('Content-Type: text/plain'), );  
+        curl_setopt_array($ch, $options);  
+        $result = curl_exec($ch);  
+        $res = json_decode($result, true);  
+        //以上代码直接从百度站长工具里复制过来  
+          
+          
+        if (isset($res['error'])) {  
+            $this->error("推送失败：".$res['message']." 错误代码：".$res['error']);  
+        } else {  
+            $this->success("成功推送".$res['success']."条，今天还可推送".$res['remain']."条");  
+        }  
+        
+       ｝
